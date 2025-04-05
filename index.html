@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Winter Garden Tales</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to bottom, #a2d2ff, #ffffff);
+      overflow: hidden;
+    }
+
+    .garden {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background: url('https://i.imgur.com/3QeV1Fx.png') no-repeat center/cover; /* Frozen background */
+    }
+
+    .tree {
+      position: absolute;
+      width: 200px;
+      height: 200px;
+      background: url('https://i.imgur.com/Yo0eHfD.png') no-repeat center/contain; /* Wishing tree */
+      background-size: contain;
+      left: 50%;
+      bottom: 50px;
+      transform: translateX(-50%) rotate(90deg); /* Tree fell down */
+      transition: transform 1s ease;
+    }
+
+    .btn-reset {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      padding: 10px 20px;
+      background-color: #ffffffcc;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .btn-reset:hover {
+      background-color: #ffffff;
+    }
+
+    .message {
+      position: absolute;
+      bottom: 100px;
+      width: 100%;
+      text-align: center;
+      font-size: 24px;
+      color: #3a3a3a;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="garden">
+    <div class="tree" id="tree"></div>
+    <button class="btn-reset" onclick="resetTree()">Reset Tree</button>
+    <div class="message" id="message">The Wishing Tree has fallen in the winter garden...</div>
+  </div>
+
+  <script>
+    function resetTree() {
+      const tree = document.getElementById('tree');
+      const message = document.getElementById('message');
+      tree.style.transform = 'translateX(-50%) rotate(0deg)';
+      message.textContent = 'You helped the Wishing Tree stand tall again!';
+    }
+  </script>
+</body>
+</html>
