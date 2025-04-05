@@ -5,9 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Winter Garden Tales</title>
   <style>
-    body {
+    * {
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: linear-gradient(to bottom, #a2d2ff, #ffffff);
       overflow: hidden;
@@ -17,19 +21,48 @@
       position: relative;
       width: 100vw;
       height: 100vh;
-      background: url('./game_background.png') no-repeat center/cover; /* Frozen background */
+      background: url('./game_background.png') no-repeat center/cover;
+    }
+
+    .snowflake {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: white;
+      border-radius: 50%;
+      opacity: 0.8;
+      animation: fall linear infinite;
+    }
+
+    @keyframes fall {
+      0% {
+        transform: translateY(-10px) translateX(0);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) translateX(50px);
+        opacity: 0;
+      }
     }
 
     .tree {
       position: absolute;
       width: 200px;
       height: 200px;
-      background: url('./tree.png') no-repeat center/contain; /* Wishing tree */
+      background: url('./tree.png') no-repeat center/contain;
       background-size: contain;
       left: 50%;
       bottom: 50px;
-      transform: translateX(-50%) rotate(90deg); /* Tree fell down */
+      transform: translateX(-50%) rotate(90deg);
       transition: transform 1s ease;
+    }
+
+    .fairy {
+      position: absolute;
+      width: 96px;
+      height: 96px;
+      background: url('./fairy_sprite.png') no-repeat left center / cover;
+      image-rendering: pixelated;
     }
 
     .btn-reset {
@@ -57,22 +90,127 @@
       color: #3a3a3a;
       font-weight: bold;
     }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
-  <div class="garden">
+  <div class="garden" id="garden">
     <div class="tree" id="tree"></div>
+    <div class="fairy" id="fairy"></div>
     <button class="btn-reset" onclick="resetTree()">Reset Tree</button>
     <div class="message" id="message">The Wishing Tree has fallen in the winter garden...</div>
+    <canvas id="ice-blast"></canvas>
   </div>
 
   <script>
+    // Fairy setup
+    const fairy = document.getElementById('fairy');
+    const canvas = document.getElementById('ice-blast');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    let posX = window.innerWidth / 2;
+    let posY = window.innerHeight - 200;
+    let velY = 0;
+    let isFlying = false;
+    let left = false, right = false;
+    let frame = 0;
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') left = true;
+      if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') right = true;
+      if (e.key === ' ') isFlying = true;
+      if (e.key.toLowerCase() === 'f') triggerIcePower();
+    });
+
+    document.addEventListener('keyup', (e) => {
+      if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') left = false;
+      if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') right = false;
+      if (e.key === ' ') isFlying = false;
+    });
+
+    function update() {
+      if (left) posX -= 4;
+      if (right) posX += 4;
+
+      if (isFlying) {
+        velY = -3;
+      } else {
+        velY += 0.2;
+      }
+
+      posY += velY;
+
+      // Clamp to ground
+      if (posY > window.innerHeight - 120) {
+        posY = window.innerHeight - 120;
+        velY = 0;
+      }
+
+      // Animate sprite
+      frame = (frame + 1) % 4;
+      fairy.style.left = `${posX}px`;
+      fairy.style.bottom = `${posY}px`;
+      fairy.style.backgroundPositionX = `-${frame * 96}px`;
+
+      requestAnimationFrame(update);
+    }
+
+    function triggerIcePower() {
+      let x = posX + 48;
+      let y = window.innerHeight - posY;
+      let radius = 0;
+      const maxRadius = 100;
+      const powerColor = 'rgba(173, 216, 230, 0.5)';
+
+      function animateBlast() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fillStyle = powerColor;
+        ctx.fill();
+        radius += 5;
+        if (radius < maxRadius) {
+          requestAnimationFrame(animateBlast);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+
+      animateBlast();
+    }
+
     function resetTree() {
       const tree = document.getElementById('tree');
       const message = document.getElementById('message');
       tree.style.transform = 'translateX(-50%) rotate(0deg)';
       message.textContent = 'You helped the Wishing Tree stand tall again!';
     }
+
+    // Snowflakes
+    function createSnowflakes(count) {
+      const garden = document.getElementById('garden');
+      for (let i = 0; i < count; i++) {
+        const snow = document.createElement('div');
+        snow.classList.add('snowflake');
+        snow.style.left = `${Math.random() * window.innerWidth}px`;
+        snow.style.animationDuration = `${4 + Math.random() * 6}s`;
+        snow.style.opacity = Math.random();
+        snow.style.top = `${-10 - Math.random() * 100}px`;
+        snow.style.width = snow.style.height = `${5 + Math.random() * 5}px`;
+        garden.appendChild(snow);
+      }
+    }
+
+    createSnowflakes(100);
+    update();
   </script>
 </body>
 </html>
